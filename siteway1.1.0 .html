@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>مدیریت وضعیت سایت</title>
+  <style>
+    :root{
+      --bg:#0a5bd3;
+      --bg2:#0b78ff;
+      --glass: rgba(255,255,255,.16);
+      --glass2: rgba(255,255,255,.10);
+      --line: rgba(255,255,255,.25);
+      --yellow:#ffdd33;
+      --yellow2:#ffd000;
+      --text:#111;
+      --muted:#222;
+      --white:#fff;
+      --danger:#ff4d4f;
+      --ok:#2ecc71;
+      --shadow: 0 10px 30px rgba(0,0,0,.2);
+      --radius: 22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Tahoma, Arial, sans-serif;
+      background: linear-gradient(180deg,var(--bg),#0a4bb2 70%, #083c90);
+      color: var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    .app{
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 110px;
+    }
+    .topbar{
+      position: sticky;
+      top: 10px;
+      z-index: 5;
+      backdrop-filter: blur(16px);
+      background: var(--glass);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .title{
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px 0;
+      text-align:center;
+    }
+    .welcome{
+      color:#fff;
+      text-align:center;
+      font-size: 16px;
+      line-height: 1.9;
+      margin-bottom: 8px;
+    }
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .search{
+      flex:1;
+      min-width: 180px;
+      background: rgba(255,255,255,.92);
+      border: none;
+      outline:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 15px;
+      color:#111;
+    }
+    .btn{
+      border:none;
+      background: var(--yellow);
+      color:#111;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor:pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,.16);
+      transition:.15s transform ease, .15s opacity ease;
+    }
+    .btn:active{transform: scale(.98)}
+    .btn.secondary{background: rgba(255,255,255,.16); color:#fff; border:1px solid var(--line)}
+    .btn.danger{background: var(--danger); color:#fff}
+    .btn.small{padding:8px 10px; border-radius: 12px; font-size: 13px}
+    .fab{
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: var(--yellow);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 34px;
+      font-weight: 900;
+      box-shadow: 0 16px 30px rgba(0,0,0,.28);
+      cursor:pointer;
+      z-index: 20;
+      border: none;
+    }
+    .list{
+      display:grid;
+      gap: 14px;
+    }
+    .card{
+      background: var(--glass);
+      border:1px solid var(--line);
+      border-radius: 22px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      color:#fff;
+    }
+    .card-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .sitecode{
+      font-size: 18px;
+      font-weight: 900;
+      color:#fff;
+      margin:0;
+      word-break: break-word;
+    }
+    .meta{
+      font-size: 12px;
+      color: rgba(255,255,255,.88);
+      line-height: 1.6;
+    }
+    .mini-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top: 10px;
+    }
+    .mini-box{
+      background: rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius: 16px;
+      padding: 10px;
+      size: 10cm;
+    }
+    .mini-box img{
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 12px;
+      display:block;
+      margin-top: 8px;
+    }
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    .btn.delete{ /* کلاس جدید برای دکمه حذف */
+        background: var(--danger);
+        color:#fff;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-weight: 800;
+        cursor:pointer;
+        box-shadow: 0 8px 20px rgba(0,0,0,.16);
+        transition:.15s transform ease, .15s opacity ease;
+        font-size: 13px;
+    }
+    .btn.delete:active{transform: scale(.98)}
+
+    .section{
+      display:none;
+    }
+    .section.active{display:block}
+    .form{
+      display:grid;
+      gap: 12px;
+    }
+    .field{
+      background: rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.20);
+      border-radius: 18px;
+      padding: 12px;
+      color:#fff;
+    }
+    .field label{
+      display:block;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color:#fff;
+    }
+    .field input, .field textarea, .field select{
+      width:100%;
+      border:none;
+      outline:none;
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(255,255,255,.94);
+      color:#111;
+      font-size: 15px;
+    }
+    .field textarea{min-height: 88px; resize: vertical}
+    .item-row{
+      border-top: 1px dashed rgba(255,255,255,.18);
+      margin-top: 12px;
+      padding-top: 12px;
+    }
+    .item-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom: 8px;
+    }
+    .item-name{
+      font-weight: 900;
+      color:#fff;
+      font-size: 15px;
+    }
+    .plus-small{
+      width: 34px; height:34px;
+      border-radius: 50%;
+      border:none;
+      background: var(--yellow);
+      font-weight: 900;
+      font-size: 20px;
+      cursor:pointer;
+    }
+    .thumbs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top: 8px;
+    }
+    .thumb{
+      position:relative;
+      width: 70px;
+      height: 70px;
+      border-radius: 12px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.18);
+      background:#fff;
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .thumb button{
+      position:absolute;
+      top:4px; left:4px;
+      border:none;
+      background: rgba(0,0,0,.6);
+      color:#fff;
+      width: 22px; height:22px;
+      border-radius: 50%;
+      cursor:pointer;
+    }
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:100;
+      padding: 16px;
+    }
+    .modal-backdrop.show{display:flex}
+    .modal{
+      width:min(100%, 720px);
+      max-height: 90vh;
+      overflow:auto;
+      background: rgba(10,91,211,.92);
+      border:1px solid rgba(255,255,255,.25);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+      backdrop-filter: blur(18px);
+      color:#fff;
+      padding: 16px;
+    }
+    .modal h2,.modal h3{margin-top:0}
+    .close-x{
+      float:left;
+      background: var(--danger);
+      color:#fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border:none;
+      font-size: 22px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .gallery-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px,1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .gallery-grid img{
+      width:100%;
+      height:120px;
+      object-fit:cover;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.2);
+    }
+    .hidden{display:none !important}
+    .notice{
+      color:#fff;
+      text-align:center;
+      opacity:.95;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    .glass-note{
+      background: rgba(255,255,255,.13);
+      border:1px solid rgba(255,255,255,.20);
+      border-radius: 18px;
+      padding: 12px;
+      color:#fff;
+      line-height: 1.8;
+    }
+    @media (max-width: 600px){
+      .mini-grid{grid-template-columns: 1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <h1 class="title">مدیریت وضعیت سایت</h1>
+      <div class="welcome" id="welcomeText">سلام مهندس</div>
+      <div class="controls">
+        <input id="searchInput" class="search" type="text" placeholder="جستجو در همه فیلدها..." />
+        <button class="btn secondary" id="backupBtn">بکاپ و ری استور</button>
+      </div>
+    </div>
+
+    <div id="homeSection" class="section active">
+      <div class="list" id="list"></div>
+    </div>
+
+    <div id="editorSection" class="section">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h2 id="editorTitle" style="margin:0">ساخت رکورد</h2>
+            <div class="meta">تمام داده‌ها در LocalStorage ذخیره می‌شوند.</div>
+          </div>
+          <button class="btn danger small" id="cancelEditBtn">لغو</button>
+        </div>
+
+        <form id="recordForm" class="form">
+          <div class="field">
+            <label>مدیریت وضعیت سایت</label>
+            <input id="siteCode" required placeholder="مثلاً: CS-1042" />
+          </div>
+
+          <div class="field">
+            <label>زمان و تاریخ ساخت</label>
+            <input id="createdAt" disabled />
+          </div>
+
+          <div id="itemsContainer"></div>
+
+          <button class="btn" type="submit">ذخیره رکورد</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" id="addBtn">+</button>
+
+  <!-- Backup/Restore Modal -->
+  <div class="modal-backdrop" id="backupModal">
+    <div class="modal">
+      <button class="close-x" id="closeBackup">×</button>
+      <h2>بکاپ و ری استور</h2>
+      <div class="glass-note">
+        از اینجا می‌تونی داده‌ها رو بکاپ بگیری، فایل JSON/Excel-style خروجی بگیری، یا ری‌استور کنی.
+        <br>برای «ارسال درجا» هم از اشتراک‌گذاری مرورگر استفاده می‌کنیم.
+      </div>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn" id="exportJsonBtn">دانلود بکاپ JSON</button>
+        <button class="btn" id="shareBtn">ارسال</button>
+        <label class="btn" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
+          ری استور
+          <input id="importFile" type="file" accept=".json,application/json" hidden />
+        </label>
+        <button class="btn secondary" id="exportCsvBtn">خروجی اکسل‌مانند CSV</button>
+      </div>
+      <p class="notice">نکته: فایل اکسل واقعی هم می‌شود ساخت، ولی CSV سبک‌تر و کم‌حجم‌تر است.</p>
+    </div>
+  </div>
+
+  <!-- First run / version modal -->
+  <div class="modal-backdrop" id="versionModal">
+    <div class="modal">
+      <button class="close-x" id="closeVersion">×</button>
+      <h2>نسخه 1.1.0</h2>
+      <div class="glass-note">
+        <strong>تغییرات نسخه:</strong>
+        <ul>
+          <li>تغییرات ظاهری</li>
+          <li>تغییر در بخش ویرایش و ویرایش عکس</li>
+          <li>رفع چند باگ کوچک در اکسل</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image picker modal -->
+  <div class="modal-backdrop" id="imageModal">
+    <div class="modal">
+      <button class="close-x" id="closeImageModal">×</button>
+      <h2>افزودن عکس</h2>
+      <div class="actions">
+        <label class="btn">
+          عکس گرفتن
+          <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden />
+        </label>
+        <label class="btn">
+          انتخاب از گالری
+          <input id="galleryInput" type="file" accept="image/*" hidden />
+        </label>
+      </div>
+      <div class="notice">عکس‌ها فشرده می‌شوند تا حجم کمتر شود.</div>
+    </div>
+  </div>
+
+  <!-- Record view modal -->
+  <div class="modal-backdrop" id="viewModal">
+    <div class="modal">
+      <button class="close-x" id="closeViewModal">×</button>
+      <div id="viewContent"></div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'siteCodes_v110';
+  const USER_KEY = 'siteCodes_user_v110';
+  const VERSION_KEY = 'siteCodes_versionShown_v110';
+  const state = { records: [], editId: null, imageTarget: null, currentViewId: null, userName: '' };
+
+  const items = [
+    'تعداد قفل فنس',
+    'مدل راک',
+    'رادیو دارد',
+    'وضعیت کولر ها',
+    'وضعیت قفل درب راک',
+    'وضعیت کیج و قفل باطری خانه',
+    'چراغ محوطه دارد',
+    'وضعیت گراند ها',
+    'وضعیت کنتور برق',
+    'ثبت شده توسط',
+    'وضعیت باتری',
+    'وضعیت ماژول'
+  ];
+
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  function jalaliNow() {
+    try {
+      const d = new Date();
+      return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+        dateStyle: 'full',
+        timeStyle: 'medium'
+      }).format(d);
+    } catch {
+      return new Date().toLocaleString('fa-IR');
+    }
+  }
+
+  function greetingByTime() {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 12) return 'صبح به خیر';
+    if (h >= 12 && h < 18) return 'عصر به خیر';
+    return 'شب به خیر';
+  }
+
+  function load() {
+    state.records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    state.userName = localStorage.getItem(USER_KEY) || '';
+  }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.records)); }
+
+  function askUser() {
+    if (!state.userName) {
+      const name = prompt('اسم شما چیست؟')?.trim();
+      if (name) {
+        state.userName = name;
+        localStorage.setItem(USER_KEY, name);
+      } else {
+        state.userName = 'مهندس';
+      }
+    }
+    $('#welcomeText').innerHTML = `سلام مهندس ${esc(state.userName)}، ${greetingByTime()}`;
+  }
+
+  function makeEmptyRecord() {
+    return {
+      id: crypto.randomUUID(),
+      siteCode: '',
+      createdAt: jalaliNow(),
+      updatedAt: '',
+      items: items.map(name => ({ name, text: '', images: [] }))
+    };
+  }
+
+  function renderItems(record) {
+    const container = $('#itemsContainer');
+    container.innerHTML = '';
+    record.items.forEach((it, idx) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'field item-row';
+      wrap.innerHTML = `
+        <div class="item-head">
+          <div class="item-name">${idx + 1} - ${esc(it.name)}</div>
+          <button class="plus-small" type="button" data-addimg="${idx}">+</button>
+        </div>
+        <input type="text" data-text="${idx}" placeholder="فقط یک متن برای این آیتم" value="${esc(it.text)}" />
+        <div class="thumbs" id="thumbs-${idx}"></div>
+      `;
+      container.appendChild(wrap);
+      const thumbs = wrap.querySelector(`#thumbs-${idx}`);
+      it.images.forEach((img, i) => {
+        const t = document.createElement('div');
+        t.className = 'thumb';
+        t.innerHTML = `<img src="${img}"><button type="button" data-delimg="${idx}:${i}">×</button>`;
+        thumbs.appendChild(t);
+      });
+    });
+    container.querySelectorAll('[data-addimg]').forEach(b => b.onclick = () => openImageModal(+b.dataset.addimg));
+    container.querySelectorAll('[data-delimg]').forEach(b => b.onclick = () => {
+      const [a,bx] = b.dataset.delimg.split(':').map(Number);
+      record.items[a].images.splice(bx,1);
+      renderItems(record); // Render again after deleting image
+    });
+  }
+
+  function openEditor(record=null) {
+    const r = record || makeEmptyRecord();
+    state.editId = r.id;
+    $('#homeSection').classList.remove('active');
+    $('#editorSection').classList.add('active');
+    $('#editorTitle').textContent = record ? 'ویرایش رکورد' : 'ساخت رکورد';
+    $('#siteCode').value = r.siteCode;
+    $('#createdAt').value = r.createdAt + (r.updatedAt ? ` | ویرایش: ${r.updatedAt}` : '');
+    $('#recordForm').dataset.id = r.id;
+    renderItems(r);
+    const set = state.records.find(x => x.id === r.id);
+    if (!set && !record) state.tempRecord = r;
+    else state.tempRecord = JSON.parse(JSON.stringify(record || r));
+  }
+
+  function closeEditor() {
+    $('#homeSection').classList.add('active');
+    $('#editorSection').classList.remove('active');
+    state.editId = null;
+    state.tempRecord = null;
+  }
+
+  function updateTempFromForm() {
+    const rec = state.tempRecord;
+    rec.siteCode = $('#siteCode').value.trim();
+    rec.items.forEach((it, idx) => {
+      it.text = document.querySelector(`[data-text="${idx}"]`)?.value.trim() || '';
+    });
+    rec.updatedAt = jalaliNow();
+  }
+
+  function upsertRecord(rec) {
+    const idx = state.records.findIndex(r => r.id === rec.id);
+    if (idx >= 0) state.records[idx] = rec;
+    else state.records.unshift(rec);
+    save();
+    renderList();
+    closeEditor();
+  }
+
+  function deleteRecord(id) {
+    if (!confirm('آیا مطمئن هستی که می‌خواهی این رکورد را حذف کنی؟')) return;
+    state.records = state.records.filter(r => r.id !== id);
+    save();
+    renderList();
+  }
+
+  function renderList() {
+    const q = $('#searchInput').value.trim().toLowerCase();
+    const list = $('#list');
+    list.innerHTML = '';
+    const filtered = state.records.filter(r => {
+      const blob = JSON.stringify(r).toLowerCase();
+      return !q || blob.includes(q);
+    });
+
+    if (!filtered.length) {
+      list.innerHTML = `<div class="card"><div class="meta">موردی پیدا نشد. یک رکورد جدید بساز، طاها؛ الان لیستت خجالت می‌کشه 😄</div></div>`;
+      return;
+    }
+
+    filtered.forEach(r => {
+      const firstBattery = r.items[10] || {};
+      const firstModule = r.items[11] || {};
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `
+        <div class="card-head">
+          <div>
+            <h3 class="sitecode">${esc(r.siteCode || 'بدون کد سایت')}</h3>
+            <div class="meta">ساخته شده: ${esc(r.createdAt)}<br>${r.updatedAt ? 'ویرایش شده: ' + esc(r.updatedAt) : ''}</div>
+          </div>
+          <div class="meta">۱۲ آیتم</div>
+        </div>
+        <div class="mini-grid">
+          <div class="mini-box">
+            <strong>وضعیت باتری</strong>
+            <div class="meta">${esc(firstBattery.text || '—')}</div>
+            ${firstBattery.images?.[0] ? `<img src="${firstBattery.images[0]}">` : ''}
+          </div>
+          <div class="mini-box">
+            <strong>وضعیت ماژول</strong>
+            <div class="meta">${esc(firstModule.text || '—')}</div>
+            ${firstModule.images?.[0] ? `<img src="${firstModule.images[0]}">` : ''}
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn small" data-view="${r.id}">مشاهده کامل</button>
+          <button class="btn small secondary" data-edit="${r.id}">ویرایش</button>
+          <button class="btn delete" data-del="${r.id}">حذف</button> <!-- دکمه حذف اضافه شده -->
+        </div>
+      `;
+      list.appendChild(el);
+    });
+
+    list.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => {
+      const rec = state.records.find(x => x.id === b.dataset.edit);
+      openEditor(JSON.parse(JSON.stringify(rec)));
+    });
+    list.querySelectorAll('[data-view]').forEach(b => b.onclick = () => openView(b.dataset.view));
+    list.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteRecord(b.dataset.del)); // اضافه کردن event listener برای دکمه حذف
+  }
+
+  function openView(id) {
+    const r = state.records.find(x => x.id === id);
+    if (!r) return;
+    const view = $('#viewContent');
+    view.innerHTML = `
+      <h2 style="margin-top:0">${esc(r.siteCode)}</h2>
+      <div class="meta">ساخته شده: ${esc(r.createdAt)}<br>${r.updatedAt ? 'ویرایش: ' + esc(r.updatedAt) : ''}</div>
+      <hr style="border-color: rgba(255,255,255,.25); margin: 14px 0">
+      ${r.items.map((it, i) => `
+        <div class="glass-note" style="margin-bottom:10px">
+          <strong>${i+1} - ${esc(it.name)}</strong><br>
+          <span>${esc(it.text || '—')}</span>
+          <div class="gallery-grid">
+            ${(it.images || []).map(img => `<img src="${img}">`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    `;
+    $('#viewModal').classList.add('show');
+  }
+
+  async function compressImage(file, maxW = 1024, quality = 0.72) {
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = URL.createObjectURL(file);
+    });
+    const c = document.createElement('canvas');
+    const scale = Math.min(1, maxW / img.width);
+    c.width = Math.round(img.width * scale);
+    c.height = Math.round(img.height * scale);
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', quality);
+  }
+
+  function openImageModal(targetIdx) {
+    state.imageTarget = targetIdx;
+    $('#imageModal').classList.add('show');
+  }
+
+  function addImageToTarget(file) {
+    if (!state.tempRecord || state.imageTarget === null) return;
+    const target = state.tempRecord.items[state.imageTarget];
+    if (target.images.length >= 5) return alert('برای هر آیتم حداکثر ۵ عکس مجاز است.');
+    compressImage(file).then(dataUrl => {
+      target.images.push(dataUrl);
+      renderItems(state.tempRecord);
+      $('#imageModal').classList.remove('show');
+    });
+  }
+
+  function exportJson() {
+    const blob = new Blob([JSON.stringify({version:'1.1.0', user:state.userName, records:state.records}, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'backup_sitecodes.json';
+    a.click();
+  }
+
+  function exportCsv() {
+    const rows = [['siteCode','createdAt','updatedAt', ...items]];
+    state.records.forEach(r => {
+      rows.push([
+        r.siteCode, r.createdAt, r.updatedAt || '',
+        ...r.items.map(it => it.text || '')
+      ]);
+    });
+    const csv = rows.map(row => row.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob(["\ufeff" + csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'backup_sitecodes.csv';
+    a.click();
+  }
+
+  async function shareData() {
+    const text = `بکاپ کد سایت\nتعداد رکوردها: ${state.records.length}\nکاربر: ${state.userName}`;
+    const blob = new Blob([JSON.stringify({version:'1.1.0', user:state.userName, records:state.records}, null, 2)], {type:'application/json'});
+    const file = new File([blob], 'backup_sitecodes.json', {type:'application/json'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+      await navigator.share({title:'بکاپ کد سایت', text, files:[file]});
+    } else if (navigator.share) {
+      await navigator.share({title:'بکاپ کد سایت', text});
+    } else {
+      alert('اشتراک‌گذاری در این مرورگر پشتیبانی نمی‌شود. از دانلود بکاپ استفاده کن.');
+    }
+  }
+
+  function restoreFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const obj = JSON.parse(reader.result);
+        state.records = obj.records || [];
+        if (obj.user) {
+          state.userName = obj.user;
+          localStorage.setItem(USER_KEY, obj.user);
+        }
+        save();
+        renderList();
+        alert('ری‌استور با موفقیت انجام شد.');
+      } catch {
+        alert('فایل معتبر نیست.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  $('#recordForm').addEventListener('submit', e => {
+    e.preventDefault();
+    updateTempFromForm();
+    if (!state.tempRecord.siteCode) return alert('کد سایت را وارد کن.');
+    upsertRecord(state.tempRecord);
+  });
+
+  $('#addBtn').onclick = () => openEditor();
+  $('#cancelEditBtn').onclick = closeEditor;
+  $('#searchInput').oninput = renderList;
+
+  $('#backupBtn').onclick = () => $('#backupModal').classList.add('show');
+  $('#closeBackup').onclick = () => $('#backupModal').classList.remove('show');
+  $('#exportJsonBtn').onclick = exportJson;
+  $('#exportCsvBtn').onclick = exportCsv;
+  $('#shareBtn').onclick = shareData;
+  $('#importFile').onchange = e => e.target.files[0] && restoreFromFile(e.target.files[0]);
+
+  $('#closeVersion').onclick = () => $('#versionModal').classList.remove('show');
+  $('#closeImageModal').onclick = () => $('#imageModal').classList.remove('show');
+  $('#closeViewModal').onclick = () => $('#viewModal').classList.remove('show');
+
+  $('#cameraInput').onchange = e => e.target.files[0] && addImageToTarget(e.target.files[0]);
+  $('#galleryInput').onchange = e => e.target.files[0] && addImageToTarget(e.target.files[0]);
+
+  window.addEventListener('click', e => {
+    ['backupModal','versionModal','imageModal','viewModal'].forEach(id => {
+      const el = document.getElementById(id);
+      if (e.target === el) el.classList.remove('show');
+    });
+  });
+
+  // Event listener for delete buttons
+  // We need to re-attach this after renderList() is called, or do it dynamically.
+  // For simplicity, we'll re-attach after renderList.
+
+  load();
+  askUser();
+  renderList(); // Initial render will attach delete listeners
+
+  if (!localStorage.getItem(VERSION_KEY)) {
+    $('#versionModal').classList.add('show');
+    localStorage.setItem(VERSION_KEY, '1');
+  }
+})();
+</script>
+</body>
+</html>
